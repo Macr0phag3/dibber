@@ -102,7 +102,9 @@ class Dibber:
         self.matched = {}
         self.chain = {}
 
-        self.output_max = 0
+        self.output_max_length = 100
+        self._t = time.time()
+        self._c = 0
 
         # fix dir() bug
         self.makeup_attr = [
@@ -237,43 +239,43 @@ class Dibber:
 
         return result
 
-    def _pprint(self, string, truncate=0):
-        end_chr = string[-1]
-        string = string[:-1]
-        if truncate > len(string):
-            string = string[:200]+' ...'
+    def _clear_line(self):
+        print(' '*self.output_max_length, end="\r")
 
-        if len(string) >= self.output_max:
-            self.output_max = len(string)
-            print(string, end=end_chr)
-        else:
-            print(string+' '*(self.output_max-len(string)), end=end_chr)
+    def _truncate(self, string):
+        if len(string) > self.output_max_length-5:
+            string = string[:self.output_max_length]+' ...'
+
+        self._clear_line()
+        print(string, end="\r")
 
     def _visit(self, node, depth=0, attr_path=[]):
         tip = "running in depth"
+
+        # 避免进度指示循环过快
         t = time.time()
-        if t - args._t > 0.1:
-            args._t = t
-            args._c = (args._c+1) % len(tip)
+        if t - self._t > 0.1:
+            self._t = t
+            self._c = (self._c+1) % len(tip)
 
         if depth == max_depth:
             return
 
         if depth:
-            self._pprint(
-                '{} {}: ... {}\r'.format(
-                    tip[:args._c]+tip[args._c].upper()+tip[args._c+1:],
+            self._truncate(
+                '{} {}: ... {}'.format(
+                    tip[:self._c]+tip[self._c].upper()+tip[self._c+1:],
                     depth+1,
                     node[self.init_length:]
                 ),
-                truncate=200
             )
 
         depth += 1
         sub_attrs = self._dir(node)
         for index, sub_attr in enumerate(sub_attrs):
             if depth == 1 and verbose:
-                self._pprint('[+] {} of {}\n'.format(index+1, len(sub_attrs)))
+                self._clear_line()
+                print('[+] {} of {}'.format(index+1, len(sub_attrs)))
 
             if sub_attr[1:] in self.black_attr:
                 continue
@@ -296,9 +298,10 @@ class Dibber:
                     continue
 
             if self._check_func(raw, live, attr_path=attr_path):
+                self._clear_line()
                 if not verbose:
-                    self._pprint(
-                        '[+] {} of {}\n'.format(index+1, len(sub_attrs))
+                    print(
+                        '[+] {} of {}'.format(index+1, len(sub_attrs))
                     )
 
                 print("  [-] find: {}".format(put_color(raw, "green")))
@@ -309,6 +312,7 @@ class Dibber:
                 new_raw = raw + self.chain[live]
                 live_cache = _eval_func(new_raw)
                 if live_cache and self._check_func(new_raw, live_cache):
+                    self._clear_line()
                     print(
                         "  [-] find in cache: {}".format(
                             put_color(new_raw, "cyan"))
@@ -430,7 +434,5 @@ except Exception as e:
 if shortest:
     args.max_length = 1000
 
-args._t = time.time()
-args._c = 0
 mro_finder = Dibber()
 mro_finder.run(init_input)
