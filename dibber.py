@@ -105,6 +105,7 @@ class Dibber:
         self.output_max_length = 100
         self._t = time.time()
         self._c = 0
+        self.printed = {}
 
         # fix dir() bug
         self.makeup_attr = [
@@ -272,10 +273,13 @@ class Dibber:
 
         depth += 1
         sub_attrs = self._dir(node)
+
         for index, sub_attr in enumerate(sub_attrs):
-            if depth == 1 and verbose:
-                self._clear_line()
-                print('[+] {} of {}'.format(index+1, len(sub_attrs)))
+            if depth == 1:
+                self.index = index+1
+                if verbose:
+                    self._clear_line()
+                    print('[+] {} of {}'.format(self.index, len(sub_attrs)))
 
             if sub_attr[1:] in self.black_attr:
                 continue
@@ -299,9 +303,10 @@ class Dibber:
 
             if self._check_func(raw, live, attr_path=attr_path):
                 self._clear_line()
-                if not verbose:
+                if self.index not in self.printed and not verbose:
+                    self.printed[self.index] = True
                     print(
-                        '[+] {} of {}'.format(index+1, len(sub_attrs))
+                        '[+] {} of {}'.format(self.index, len(sub_attrs))
                     )
 
                 print("  [-] find: {}".format(put_color(raw, "green")))
@@ -313,6 +318,12 @@ class Dibber:
                 live_cache = _eval_func(new_raw)
                 if live_cache and self._check_func(new_raw, live_cache):
                     self._clear_line()
+                    if self.index not in self.printed and not verbose:
+                        self.printed[self.index] = True
+                        print(
+                            '[+] {} of {}'.format(self.index, len(sub_attrs))
+                        )
+
                     print(
                         "  [-] find in cache: {}".format(
                             put_color(new_raw, "cyan"))
