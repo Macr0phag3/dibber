@@ -4,7 +4,7 @@
 
 ## help
 
-<img src="/pics/help.png" width="600">
+<img src="/img/help.png" width="600">
 
 
 ```bash
