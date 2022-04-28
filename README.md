@@ -32,15 +32,21 @@ optional arguments:
 理论上支持所有版本的 Python
 
 ### 示例
-1. 搜索 python code `"".__class__.__mro__[-1].__subclasses__()` 的利用链：`python dibber.py --check run_script_os --depth 6 '"".__class__.__mro__[-1].__subclasses__()'`
+1. 搜索 python code `"".__class__.__mro__[-1].__subclasses__()` 的利用链：
+
+`python dibber.py --check run_script_os --depth 6 '"".__class__.__mro__[-1].__subclasses__()'`
 
 <img src="/img/exp1.png" width="600">
 
-1. 搜索 jinja2 `self` 的利用链：`python dibber.py --check keyword_check --eval jinja2_template 'self' --depth 4`
+2. 搜索 jinja2 `self` 的利用链：
+
+`python dibber.py --check keyword_check --eval jinja2_template 'self' --depth 4`
 
 <img src="/img/exp2.png" width="600">
 
-1. 搜索 mako `self` 的利用链：`python dibber.py --check keyword_check --eval mako_template 'context' --depth 4`
+3. 搜索 mako `self` 的利用链：
+
+`python dibber.py --check keyword_check --eval mako_template 'context' --depth 4`
 
 <img src="/img/exp3.png" width="600">
 
