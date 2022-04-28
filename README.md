@@ -44,7 +44,7 @@ optional arguments:
 
 <img src="/img/exp2.png" width="600">
 
-3. 搜索 mako `self` 的利用链：
+3. 搜索 mako `context` 的利用链：
 
 `python dibber.py --check keyword_check --eval mako_template 'context' --depth 4`
 
