@@ -1,4 +1,3 @@
-import pickle
 import __main__
 
 from jinja2 import Template
