@@ -31,7 +31,7 @@ def put_color(string, color, bold=True):
 def hashable(obj):
     try:
         hash(obj)
-    except TypeError:
+    except Exception:
         return False
 
     return True
@@ -140,6 +140,7 @@ class Dibber:
             '__ceil__', '__floor__', '__getformat__', '__round__',
             '__set_format__', '__delete__', '__set__', '__ilshift__',
             '__imatmul__', '__imod__', '__index__', '__rrshift__', '__bytes__',
+            '__del__', '__call__',
         ]
 
         # do NOT call these class func
@@ -170,7 +171,13 @@ class Dibber:
             'traceback.print_exc', 'traceback.print_stack',
             'uu.test', 'zlib.Compress', 'zlib.Decompress', 'zlib.decompressobj',
             'breakpoint', 'breakpointhook',
-            'help', "print", "input", "raw_input", "copyright"
+            'help', "print", "input", "raw_input", "copyright",
+            "TextIOWrapper.__exit__", "TextIOWrapper.close",
+            "TextIOWrapper.detach", "TextIOWrapper.read",
+            "TextIOWrapper.readline", "TextIOWrapper.readlines",
+            'lock.__enter__', 'lock.acquire', 'lock.acquire_lock',
+            "Thread._wait_for_tstate_lock", "Thread.join",
+            "_MainThread",
         ] + [
             # common
             "_test", "_shutdown", "main", "writelines",
@@ -241,7 +248,7 @@ class Dibber:
         return result
 
     def _clear_line(self):
-        print(' '*self.output_max_length, end="\r")
+        print(' '*(self.output_max_length+3), end="\r")
 
     def _truncate(self, string):
         if len(string) > self.output_max_length-5:
@@ -271,6 +278,9 @@ class Dibber:
                 ),
             )
 
+        if verbose > 2:
+            print(f'  [DEBUG] {node}')
+
         depth += 1
         sub_attrs = self._dir(node)
 
@@ -291,6 +301,9 @@ class Dibber:
 
             _module = _safe_getattr(live, '__module__') or ''
             if callable(live):
+                if verbose == 2:
+                    print(f'  [CALLABLE] {node}')
+
                 _name = _safe_getattr(live, '__name__') or ''
                 _qname = _safe_getattr(live, '__qualname__')
                 if any([i in self.black_callable for i in [
